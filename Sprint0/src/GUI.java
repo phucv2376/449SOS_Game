@@ -25,7 +25,6 @@ public class GUI extends JFrame implements ActionListener {
         this.setVisible(true);
 
         this.add(b1, BorderLayout.SOUTH);
-        this.add(new JCheckBox("Temporary checkbox "));
     }
 
     @Override
