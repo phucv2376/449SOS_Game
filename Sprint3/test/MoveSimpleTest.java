@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MoveSimpleTest {
     @Test //AC 4.1 Player make valid move in a simple game
     void TestValidMoveSimple() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSSimpleLogic(blue, red);
         gameConds.startGame();
         assertTrue(gameConds.getSimple());
         assertTrue(gameConds.makePlayerMove(0, 0));
@@ -14,7 +16,9 @@ public class MoveSimpleTest {
 
     @Test //AC 4.2 Player tries to move on an occupied spot in a simple game
     void TestInvalidMoveSimple() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSSimpleLogic(blue, red);
         gameConds.startGame();
         gameConds.makePlayerMove(0, 0);
         assertTrue(gameConds.getSimple());

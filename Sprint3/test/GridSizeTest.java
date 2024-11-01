@@ -4,25 +4,32 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 //AC 1.x
-class BoardSizeTest {
+class GridSizeTest {
     @Test //AC 1.1 The game board size defaults to 3x3.
     void testDefaultBoardSize() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSSimpleLogic(blue, red);
         assertEquals(3, gameConds.getBoardSize());
     }
 
     @Test //AC 1.2 The player selects a custom board size
     void testCustomBoardSize() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSSimpleLogic(blue, red);
         gameConds.setBoardSize(15);
         assertEquals(15, gameConds.getBoardSize());
     }
 
     @Test //AC 1.3 Player attempts to choose an invalid board size (less than 2x2).
     void testInvalidBoardSize() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSSimpleLogic(blue, red);
         gameConds.setBoardSize(-1);
-        SOSLogic gameConds2 = new SOSLogic();
+        
+        SOSLogic gameConds2 = new SOSSimpleLogic(blue, red);
         gameConds2.setBoardSize(35);
         assertEquals(2, gameConds.getBoardSize());
         assertEquals(30, gameConds2.getBoardSize());

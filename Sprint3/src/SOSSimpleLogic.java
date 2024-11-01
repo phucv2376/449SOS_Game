@@ -1,6 +1,6 @@
 public class SOSSimpleLogic extends SOSLogic {
-    public SOSSimpleLogic() {
-        super();
+    public SOSSimpleLogic(Player blue, Player red) {
+        super(blue, red);
     }
 
     //Make player move in accordance with game conditions.
@@ -11,7 +11,12 @@ public class SOSSimpleLogic extends SOSLogic {
         if (this.state == GameState.BLUE || this.state == GameState.RED) {
             Player currPlayer = (this.state) == GameState.BLUE ? this.blue : this.red;
             if (!isOccupied(row, col)) {
-                currPlayer.addMove(row, col);
+                board[row][col] = currPlayer.getLetter();
+                movesMade = movesMade + 1;
+                if (calculateCompletedSequence() == 1 || movesMade == boardSize * boardSize) {
+                    endGame();
+                    return true;
+                }
                 this.altTurn();
                 return true;
             }
@@ -19,24 +24,11 @@ public class SOSSimpleLogic extends SOSLogic {
         return false;
     }
 
-    //Returns number of completed sequence from one move
-    public int checkCompletedSequence(char letter, int row, int col) {
-//        int totalCompleted = 0;
-//        int allMoves = getAllMoves();
-//        //Check horizontal
-//        if (letter == 'S') {
-//            if (col > 1 && allMoves[row][col - 1] == 'O' && allMoves[row][col - 2] == 'S') {
-//
-//            }
-//        } else {
-//
-//        }
-//        //Check vertical
-//        //Check diagonal
-        return 0;
-    }
-
-    public boolean checkEndOfGame() {
-        return false;
+    public void endGame() {
+        if (movesMade == boardSize * boardSize) {
+            setState(GameState.DRAW);
+            return;
+        }
+        setState(getState() == GameState.RED ? GameState.REDWIN : GameState.BLUEWIN);
     }
 }

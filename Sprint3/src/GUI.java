@@ -7,21 +7,24 @@ import java.awt.event.MouseEvent;
 
 //GUI Window
 public class GUI extends JFrame implements ActionListener {
-    private final Board board;
-    private final GameConfigPanel gameConfigPanel;
+    private Grid grid;
+    private GameConfigPanel gameConfigPanel;
     private final GameStateIndicatorPanel gameStateIndicatorPanel;
-    private final SOSLogic gameConds;
+    private SOSLogic gameConds;
+    Player blue;
+    Player red;
+    int currBoardSize = 3;
     //Initialize GUI window
-    public GUI(SOSLogic gameConds) {
+    public GUI() {
         this.setTitle("449 SOS_Game");
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        this.gameConds = gameConds;
-        Player blue = gameConds.getBlue();
-        Player red = gameConds.getRed();
-        this.board = new Board(gameConds, blue, red);
-        this.gameConfigPanel = new GameConfigPanel(gameConds, board);
+        blue = new Player("blue", 'S');
+        red = new Player("red", 'S');
+        this.gameConds = new SOSSimpleLogic(blue, red);
+        this.grid = new Grid();
+        this.gameConfigPanel = new GameConfigPanel();
         this.gameStateIndicatorPanel = new GameStateIndicatorPanel();
 
         updateGameStateToolTips();
@@ -31,7 +34,7 @@ public class GUI extends JFrame implements ActionListener {
         this.add(new PlayerConfigPanel(red), BorderLayout.EAST);
         this.add(gameStateIndicatorPanel, BorderLayout.SOUTH);
         this.add(gameConfigPanel, BorderLayout.NORTH);
-        this.add(board, BorderLayout.CENTER);
+        this.add(grid, BorderLayout.CENTER);
 
         this.pack();
         this.setVisible(true);
@@ -50,30 +53,22 @@ public class GUI extends JFrame implements ActionListener {
             gameStateIndicatorPanel.setToolTipText("Blue's turn to move.");
         } else if (gameConds.getState() == GameState.RED) {
             gameStateIndicatorPanel.setToolTipText("Red's turn to move.");
-        } else {
-            // Indicate winning team later TBA
+        } else if (gameConds.getState() == GameState.BLUEWIN) { // Indicate winner
+            gameStateIndicatorPanel.setToolTipText("Blue player wins | Press \"Restart Game\" to play again.");
+        } else if (gameConds.getState() == GameState.REDWIN) { // Indicate winner
+            gameStateIndicatorPanel.setToolTipText("Red player wins | Press \"Restart Game\" to play again.");
+        } else if (gameConds.getState() == GameState.DRAW) {
+            gameStateIndicatorPanel.setToolTipText("Draw game | Press \"Restart Game\" to play again.");
         }
     }
-    //getters & setters
-    public Board getBoard() {
-        return board;
-    }
 
-    //Board or Grid UI class
-    public class Board extends JPanel  {
-        private final SOSLogic gameConds;
-        private final Player blue;
-        private final Player red;
+    //Grid or Grid UI class
+    public class Grid extends JPanel {
         private int spacing = 100; //initial spacing 100
         private int[] gridAnchor;
 
-        //Initialize board
-        public Board(SOSLogic gameConds, Player blue, Player red) {
-            this.gameConds = gameConds;
-            this.blue = blue;
-            this.red = red;
-
-            //Listen and handle mouse click on board
+        public Grid() {
+            //Listen and handle mouse click on grid
             addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     handleMoveClick(e.getX(), e.getY());
@@ -96,17 +91,46 @@ public class GUI extends JFrame implements ActionListener {
             FontMetrics fmet = g.getFontMetrics();
 
             //Render Player Moves
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setStroke(new BasicStroke(10));
+
             renderMoves(g, fmet, blue);
             renderMoves(g, fmet, red);
+            renderCompleteSequence(g2);
         }
-        //Rerender board grid
+
+        public void renderCompleteSequence(Graphics2D g2) {
+            for (int[][] sequence: blue.getCompletedSequences()) {
+                int[] rowColBegin= getCellCenter(sequence[0][0], sequence[0][1]);
+                int[] rowColEnd= getCellCenter(sequence[2][0], sequence[2][1]);
+
+                g2.setColor(Color.BLUE);
+                g2.drawLine(rowColBegin[0], rowColBegin[1], rowColEnd[0], rowColEnd[1]);
+            }
+            for (int[][] sequence: red.getCompletedSequences()) {
+                int[] rowColBegin= getCellCenter(sequence[0][0], sequence[0][1]);
+                int[] rowColEnd= getCellCenter(sequence[2][0], sequence[2][1]);
+
+                g2.setColor(Color.RED);
+                g2.drawLine(rowColBegin[0], rowColBegin[1], rowColEnd[0], rowColEnd[1]);
+            }
+        }
+
+        //Rerender grid grid
         public void updateBoard() {
             this.repaint();
         }
-        //Get center of board grid
+
+        //Get center of grid
         private int[] getCenter() {
-            return(new int[]{this.getWidth() / 2, this.getHeight() / 2});
+            return (new int[]{this.getWidth() / 2, this.getHeight() / 2});
         }
+        private int[] getCellCenter(int row,int col) {
+            int cellRelativeCenter = this.spacing / 2;
+            int[] rowCol = rowColToPos(row, col);
+            return new int[]{rowCol[0] + cellRelativeCenter, rowCol[1] + cellRelativeCenter};
+        }
+
         //Update grid top left x and y positioning
         private void updateGridTopLeft() {
             int totalGridSize = gameConds.getBoardSize() * spacing;
@@ -117,6 +141,7 @@ public class GUI extends JFrame implements ActionListener {
 
             this.gridAnchor = new int[]{xTopLeft, yTopLeft};
         }
+
         //Update grid square scaling
         private void updateSpacing() {
             if (this.getHeight() < this.getWidth()) {
@@ -125,8 +150,10 @@ public class GUI extends JFrame implements ActionListener {
                 this.spacing = (this.getWidth() - 20) / gameConds.getBoardSize();
             }
         }
-        //Handle when player clicks on board and is making a move
+
+        //Handle when player clicks on grid and is making a move
         private void handleMoveClick(int xPos, int yPos) {
+            if (!(gameConds.getState() == GameState.RED || gameConds.getState() == GameState.BLUE)) return;
             int[] rowCol = posToRowCol(xPos, yPos);
             boolean isSuccessMove = gameConds.makePlayerMove(rowCol[0], rowCol[1]);
             if (!isSuccessMove) {
@@ -136,28 +163,35 @@ public class GUI extends JFrame implements ActionListener {
             updateGameStateToolTips();
             repaint();
         }
+
         //Translate row and column into window x,y positions
         private int[] rowColToPos(int row, int col) { //row col start from 0
             int x = col * spacing + gridAnchor[0];
             int y = row * spacing + gridAnchor[1];
-            return new int[] {x, y};
+            return new int[]{x, y};
         }
+
         //Translate x,y positions into row and column
         private int[] posToRowCol(int xPos, int yPos) {
             int row = (yPos - gridAnchor[1]) / spacing;
             int col = (xPos - gridAnchor[0]) / spacing;
-            return new int[] {row, col};
+            return new int[]{row, col};
         }
+
         //render moves made by Player
         private void renderMoves(Graphics g, FontMetrics fmet, Player player) {
 //        g.setColor((Objects.equals(player.getColor(), "Blue")) ? Color.blue : Color.red);
-            for (int[] move: player.getPrevMoves()) {
-                int[] pos = rowColToPos(move[0], move[1]); //https://stackoverflow.com/questions/27706197/how-can-i-center-graphics-drawstring-in-java
-                g.drawString(String.valueOf((char)move[2]), pos[0] + (spacing -  fmet.stringWidth(String.valueOf(player.getLetter()))) / 2, pos[1] + ((spacing - fmet.getHeight()) / 2) + fmet.getAscent());
+            for (int row = 0; row < gameConds.getBoardSize(); row++) {
+                for (int col = 0; col < gameConds.getBoardSize(); col++) {
+                    if (!gameConds.isOccupied(row, col)) continue;
+                    int[] pos = rowColToPos(row, col); //https://stackoverflow.com/questions/27706197/how-can-i-center-graphics-drawstring-in-java
+                    g.drawString(String.valueOf(gameConds.getBoard()[row][col]), pos[0] + (spacing - fmet.stringWidth(String.valueOf(player.getLetter()))) / 2, pos[1] + ((spacing - fmet.getHeight()) / 2) + fmet.getAscent());
+                }
             }
         }
     }
-    public class GameStateIndicatorPanel extends JPanel {
+
+    private class GameStateIndicatorPanel extends JPanel {
         private final JLabel gameStateToolTips;
         //Constructor
         public GameStateIndicatorPanel() {
@@ -230,30 +264,28 @@ public class GUI extends JFrame implements ActionListener {
     //Game configuration panels on the top
     public class GameConfigPanel extends JPanel implements ActionListener  {
         private final JButton gameTypeToggler;
-        private final SOSLogic gameConds;
         private final JSpinner boardSizeInput;
         private final JButton gameStartRestart;
 
         //Constructor
-        public GameConfigPanel(SOSLogic gameConds, GUI.Board board) {
-            this.gameConds = gameConds;
-
+        public GameConfigPanel() {
             gameTypeToggler = new JButton((gameConds.isSimple())? "Current Game Type: Simple" : " Current GameType: General");
             gameTypeToggler.addActionListener(this);
             gameStartRestart = new JButton("Start Game");
             gameStartRestart.addActionListener(this);
 
-            //Board size input
+            //Grid size input
             SpinnerModel model = new SpinnerNumberModel(gameConds.getBoardSize(), 2, 30, 1);
             boardSizeInput = new JSpinner(model);
             boardSizeInput.addChangeListener(e -> {
                 gameConds.setBoardSize((Integer) boardSizeInput.getValue());
-                board.updateBoard();
+                currBoardSize = gameConds.getBoardSize();
+                grid.updateBoard();
             });
 
             //Add components to panel
             this.add(gameTypeToggler);
-            this.add(new JLabel("Board Size:"));
+            this.add(new JLabel("Grid Size:"));
             this.add(boardSizeInput);
             this.add(gameStartRestart);
 
@@ -263,17 +295,24 @@ public class GUI extends JFrame implements ActionListener {
             //Change game type toggle and its button label on click
             if (e.getSource() == gameTypeToggler && gameConds.isSimple()) {
                 gameConds.setSimple(false);
+                gameConds = new SOSGeneralLogic(blue, red);
+                gameConds.setBoardSize(currBoardSize);
+                grid.updateBoard();
                 gameTypeToggler.setText("Current Game Type: General");
             } else if (e.getSource() == gameTypeToggler && !gameConds.isSimple()) {
                 gameConds.setSimple(true);
+                gameConds = new SOSSimpleLogic(blue, red);
+                gameConds.setBoardSize(currBoardSize);
+                grid.updateBoard();
                 gameTypeToggler.setText("Current Game Type: Simple");
-
                 //Start new game  on click
-            } else if (e.getSource() == gameStartRestart && gameConds.getState() == GameState.PRE) {
+            } else if (e.getSource() == gameStartRestart) {
                 gameConds.startGame();
-                board.updateBoard();
+                grid.updateBoard();
                 gameStartRestart.setText("Restart Game");
                 gameStateIndicatorPanel.setToolTipText("Blue's turn to move.");
+                blue.reset();
+                red.reset();
             }
         }
     }

@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MoveGeneralTest {
     @Test //AC 6.1 Player make valid move in a General game
     void TestValidMoveGeneral() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSGeneralLogic(blue, red);
         gameConds.setSimple(false);
         gameConds.startGame();
 
@@ -17,7 +19,9 @@ public class MoveGeneralTest {
 
     @Test //AC 6.2 Player tries to move on an occupied spot in a General game
     void TestInvalidMoveGeneral() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSGeneralLogic(blue, red);
         gameConds.startGame();
         gameConds.makePlayerMove(0, 0);
         gameConds.setSimple(false);

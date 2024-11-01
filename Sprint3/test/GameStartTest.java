@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GameStartTest {
     @Test //AC 3.1 Player successfully start new game with custom settings
     void TestStartCustomGame() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSSimpleLogic(blue, red);
         gameConds.setBoardSize(2);
         gameConds.setSimple(false);
         gameConds.startGame();
@@ -15,7 +17,9 @@ public class GameStartTest {
     }
     @Test //AC 3.2 Player successfully start game with default settings
     void TestStartDefaultGame() {
-        SOSLogic gameConds = new SOSLogic();
+        Player blue = new Player("blue", 'S');
+        Player red = new Player("red", 'S');
+        SOSLogic gameConds = new SOSSimpleLogic(blue, red);
         gameConds.startGame();
         assertEquals(GameState.BLUE, gameConds.getState());
         assertEquals(3, gameConds.getBoardSize());

@@ -3,7 +3,7 @@ public class Main {
         initializeGame();
     }
     public static void initializeGame() {
-        SOSLogic gameConds = new SOSSimpleLogic();
-        new GUI(gameConds);
+        new GUI();
     }
 }
+
