@@ -7,7 +7,7 @@ public abstract class SOSLogic {
     protected Player blue;
     protected Player red;
     protected int boardSize;
-    protected char[][] board; //[0] = blue
+    protected char[][] board;
 
     protected ArrayList<int[]> moveRecord = new ArrayList<>();
     protected int totalCompletedSeq = 0;
@@ -17,10 +17,6 @@ public abstract class SOSLogic {
     // setters & getters
     public int getMovesMade() {
         return movesMade;
-    }
-
-    public ArrayList<int[]> getMoveRecord() {
-        return moveRecord;
     }
 
     public boolean getSimple() {
@@ -200,7 +196,7 @@ public abstract class SOSLogic {
         int completedSeqDelta = 0;
         Player currPlayer = (this.state) == GameState.BLUE
                 ? this.blue
-                : this.red; // Specify the curent turn player and their opposition
+                : this.red; // Specify the current turn player and their opposition
         Player oppPlayer = (this.state) == GameState.BLUE ? this.red : this.blue;
         char[][] tempBoard =
                 new char[boardSize][boardSize]; // Initialize the 2D array

@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -94,7 +95,7 @@ public class GUI extends JFrame implements ActionListener {
 
         final int DELAY = 300; //300ms
 
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override
             protected Void doInBackground() throws InterruptedException {
                 for (int i = 0; i < importedTotalMoves; i++) {
@@ -133,7 +134,7 @@ public class GUI extends JFrame implements ActionListener {
         fileContent = fileContent + (configs.currBoardSize + "\n");
         fileContent = fileContent + (logic.getMovesMade() + "\n");
         fileContent = fileContent + (logic.getMoveRecordAsString() + "\n");
-        PrintWriter writer = null;
+        PrintWriter writer;
         try {
             writer = new PrintWriter("game.txt", StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -141,7 +142,6 @@ public class GUI extends JFrame implements ActionListener {
         }
         writer.print(fileContent);
         writer.close();
-        System.out.println(fileContent);
     }
 
     public void
@@ -303,8 +303,6 @@ public class GUI extends JFrame implements ActionListener {
             if (!(logic.getState() == GameState.RED
                     || logic.getState() == GameState.BLUE))
                 return;
-            //            Player currPlayer = (logic.getState() == GameState.BLUE) ?
-            //            blue : red;
             int[] rowCol = posToRowCol(xPos, yPos);
             boolean isSuccessMove = logic.makePlayerMove(rowCol[0], rowCol[1]);
             if (!isSuccessMove) {
@@ -333,8 +331,6 @@ public class GUI extends JFrame implements ActionListener {
 
         // render moves made by Player
         private void renderMoves(Graphics g, FontMetrics fmet, Player player) {
-            //        g.setColor((Objects.equals(player.getColor(), "Blue")) ?
-            //        Color.blue : Color.red);
             for (int row = 0; row < logic.getBoardSize(); row++) {
                 for (int col = 0; col < logic.getBoardSize(); col++) {
                     if (!logic.isOccupied(row, col))
@@ -540,6 +536,7 @@ public class GUI extends JFrame implements ActionListener {
                 updateGameStateToolTips();
             } else if (e.getSource() == replayButton) {
                 JFileChooser chooser = new JFileChooser();
+                chooser.setCurrentDirectory(new File("."));
                 chooser.showOpenDialog(this);
                 int result = chooser.showOpenDialog(this);
                 if (result == JFileChooser.APPROVE_OPTION) {

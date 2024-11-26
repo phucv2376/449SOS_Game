@@ -1,14 +1,11 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 //Player class; can only be 2 instances;blue and red
 public class Player {
     private final String color;
     private char letter;
-    private Boolean isComputer = false;
     private final ArrayList<int[][]> completedSequences = new ArrayList<>();
-    private final ArrayList<int[]> moveRecord = new ArrayList<>();
     protected SOSLogic logic;
 
     //Constructor
@@ -29,22 +26,12 @@ public class Player {
     public void setLetter(char letter) {
         this.letter = letter;
     }
-    public Boolean getComputer() {
-        return isComputer;
-    }
-    public void setComputer(Boolean isComputer) {
-        this.isComputer = isComputer;
-    }
     public String getColor() {
         return color;
     }
     public void addCompletedSequence(int[][] sequence) {
         if (!completedSequences.contains(sequence))
             this.completedSequences.add(sequence);
-    }
-    public void addMoveRecord(int[] move) {
-        if (!moveRecord.contains(move))
-            this.moveRecord.add(move);
     }
 
     public ArrayList<int[][]> getCompletedSequences() {

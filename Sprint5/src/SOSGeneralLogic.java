@@ -17,10 +17,6 @@ public class SOSGeneralLogic extends SOSLogic {
                 int[] move = {currPlayer.getLetter(), row,
                         col}; // add player move history for recording purposes
                 addMoveRecord(move);
-                if (movesMade == boardSize * boardSize) {
-                    endGame();
-                    return true;
-                }
                 int completedSequenceDelta = calculateCompletedSequence();
                 if (completedSequenceDelta
                         > 0) { // Check if new move completed a new sequence
@@ -29,6 +25,10 @@ public class SOSGeneralLogic extends SOSLogic {
                         return currPlayer
                                 .makeComputerMove(); // Get computer player to make another move
                     // if it completed a new seq
+                    return true;
+                }
+                if (movesMade == boardSize * boardSize) {
+                    endGame();
                     return true;
                 }
                 this.handleTurnCycle();

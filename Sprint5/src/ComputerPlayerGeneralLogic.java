@@ -1,5 +1,3 @@
-import java.util.Random;
-
 public class ComputerPlayerGeneralLogic extends Player {
     public ComputerPlayerGeneralLogic(String color, char letter) {
         super(color, letter);
@@ -10,8 +8,6 @@ public class ComputerPlayerGeneralLogic extends Player {
         int bestNumOfCompletedSeq = 0; //Max number of completed sequence if move is made
         int[] bestSeq = new int[2];
         char bestSeqLetter = 'O';
-
-//        System.out.println("MAKING GENCOMPUTERMOVE");
 
         for (char letter : new char[]{'S', 'O'}) {
             for (int i = 0; i < logic.getBoardSize(); i++) {

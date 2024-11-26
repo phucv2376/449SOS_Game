@@ -1,5 +1,3 @@
-import java.util.Random;
-
 public class ComputerPlayerSimpleLogic extends Player {
     public ComputerPlayerSimpleLogic(String color, char letter) {
         super(color, letter);
